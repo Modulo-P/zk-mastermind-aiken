@@ -1,0 +1,167 @@
+{
+  "preamble": {
+    "title": "ash/mastermind-aiken",
+    "description": "Aiken contracts for project 'ash/mastermind-aiken'",
+    "version": "0.0.0",
+    "plutusVersion": "v2",
+    "compiler": {
+      "name": "Aiken",
+      "version": "v1.0.21-alpha+b6acdde"
+    },
+    "license": "Apache-2.0"
+  },
+  "validators": [
+    {
+      "title": "mastermind.astermind",
+      "datum": {
+        "title": "dat",
+        "schema": {
+          "$ref": "#/definitions/mastermind~1GameDatum"
+        }
+      },
+      "redeemer": {
+        "title": "rdm",
+        "schema": {
+          "$ref": "#/definitions/mastermind~1GameRedeemer"
+        }
+      },
+      "compiledCode": "59066401000032323232323232323222232323232533300a32323232323232325333015301800213232323232323232533301d302000213232533301f30220021323232323232323253330243370e900218118008991919191919299981519b874800000c54ccc0a8cdc39bad300130280274800054ccc0a802054ccc0a8cdc399918008009129998178008a4000266e0120023300200230320013758605e606060606060605004e90040a99981519b87375a6002605000a900109980100f9bae301e302800514a029405280a501533302a3370e90010018a99981519b87337006eb4c004c0a009d2002375a6002605000a2a66605466e1ccdc31bad300130280274801120001533302a337126eb4c004c0a009d20141533302a00913300201f375c603c605004e29405280a5014a02a66605466e1d20040031533302a3370e66e00dd698009814013a40046eb4c004c0a001454ccc0a8cdc399b86375a6002605004e9002240042a66605466e24dd698009814013a40282a66605401226600403e6eb8c074c0a009c5280a5014a029404c94ccc0ad4ccc0accdc39bad30013029028480204cc00c080dd7180f98148140a5014a22a666056a66605666e20dd69800981481424010266e1cdd6980118148142402829404cc00c080dd7180f18148140a502303030313031303130310012302f3030303030303030303030300012232323300100100222533303000114a026464a66605e66e3c008018528899802002000981a0011bae30320013758605e606060606060606060606060606060606050004604c046603e002605400260440022c60186042014a66604466e3c04001854ccc088cdc7807002099b8700c3370400490020a5014a0a66604266e3c03c01454ccc084cdc7806801899b8700b00114a02940dd6981280098128011bae30230013023002375c60420022c6eb0c080004c02cdd59807180c0008b180f00099299980c99b8748008c0600044cc88c8cc00400400c894ccc08000452f5c026464a66603e6464a66604266e1d200200113371e00e6eb8c098c07c008528180f8009809180e9809180e80109981180119802002000899802002000981200118110009bac30023017300c3017014375c6018602e6018602e603c602e0022c6018602c0264603a603c603c0026eb4c06c004c06c008dd7180c800980c8011bae3017001163758602c00260026eacc010c038c010c0380088c8cc004004008894ccc05400452f5c0264666444646600200200644a66603600220062646603a6e9ccc074dd48031980e9ba9375c60340026603a6ea0dd6980d800a5eb80cc00c00cc07c008c074004dd7180a0009bab3015001330030033019002301700132533300f3370e900118070008991919299980919b8748000c0440044c05cc04000458c8c8cc004004008894ccc05c0045300103d87a80001323253330163375e6012602800400c266e9520003301a0024bd70099802002000980d801180c8009bac3004300f3004300f00c3015001300d001163002300c009230130012301230130013010001300800514984d958c94ccc028cdc3a40000022a66601a601000c2930b0a99980519b874800800454ccc034c020018526161533300a3370e90020008a99980698040030a4c2c2a66601466e1d20060011533300d300800614985858c020014c0040148c94ccc024cdc3a4000002264646464646464646464646464646464646464646464646464646464646464646464a66605c6062004264646464646464646464931981700511bad0013302d00b2323302f0012375a0026eb0004cc0b00308dd6800998158069191981680091bad00137580026605401c464660580024646605c00246eb4004dd60009bac0013302900f2323302b0012375a0026eb0004cc0a00408c8cc0a80048dd68009bac00133027011232330290012375a0026eb0004cc0980488dd68009981280d91bad001163758605e002605e0046eb0c0b4004c0b4008dd6181580098158011bac302900130290023758604e002604e0046eb0c094004c094008dd6181180098118011bac302100130210023758603e002603e0046eb4c074004c074008dd6980d800980d8011bad30190013019002375a602e002602e0046eb0c054004c054008dd6980980098098011bae30110013011002375c601e002600e0042c600e00244646600200200644a66601a00229309919801801980880118019807800918029baa001230033754002ae6955ceaab9e5573eae815d0aba201",
+      "hash": "7338c1ce2b56b281c5cfbcedcc68d3d8f4854d8b11599b71a111678d"
+    }
+  ],
+  "definitions": {
+    "ByteArray": {
+      "dataType": "bytes"
+    },
+    "Int": {
+      "dataType": "integer"
+    },
+    "List$Int": {
+      "dataType": "list",
+      "items": {
+        "$ref": "#/definitions/Int"
+      }
+    },
+    "List$List$Int": {
+      "dataType": "list",
+      "items": {
+        "$ref": "#/definitions/List$Int"
+      }
+    },
+    "List$List$List$Int": {
+      "dataType": "list",
+      "items": {
+        "$ref": "#/definitions/List$List$Int"
+      }
+    },
+    "mastermind/GameDatum": {
+      "title": "GameDatum",
+      "anyOf": [
+        {
+          "title": "GameDatum",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "title": "code_master",
+              "$ref": "#/definitions/ByteArray"
+            },
+            {
+              "title": "code_breaker",
+              "$ref": "#/definitions/ByteArray"
+            },
+            {
+              "title": "hash_solution",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "guess",
+              "$ref": "#/definitions/List$Int"
+            },
+            {
+              "title": "black_pegs",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "white_pegs",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "current_turn",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "n_public",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "vk_alpha1",
+              "$ref": "#/definitions/List$Int"
+            },
+            {
+              "title": "vk_beta2",
+              "$ref": "#/definitions/List$List$Int"
+            },
+            {
+              "title": "vk_gamma2",
+              "$ref": "#/definitions/List$List$Int"
+            },
+            {
+              "title": "vk_delta2",
+              "$ref": "#/definitions/List$List$Int"
+            },
+            {
+              "title": "vk_alphabeta12",
+              "$ref": "#/definitions/List$List$List$Int"
+            },
+            {
+              "title": "ic",
+              "$ref": "#/definitions/List$List$Int"
+            },
+            {
+              "title": "pi_a",
+              "$ref": "#/definitions/List$Int"
+            },
+            {
+              "title": "pi_b",
+              "$ref": "#/definitions/List$List$Int"
+            },
+            {
+              "title": "pi_c",
+              "$ref": "#/definitions/List$Int"
+            }
+          ]
+        }
+      ]
+    },
+    "mastermind/GameRedeemer": {
+      "title": "GameRedeemer",
+      "anyOf": [
+        {
+          "title": "Start",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": []
+        },
+        {
+          "title": "Guess",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": []
+        },
+        {
+          "title": "Clue",
+          "dataType": "constructor",
+          "index": 2,
+          "fields": []
+        },
+        {
+          "title": "End",
+          "dataType": "constructor",
+          "index": 3,
+          "fields": []
+        }
+      ]
+    }
+  }
+}
