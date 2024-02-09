@@ -1,4 +1,5 @@
 use aiken/hash.{Blake2b_224, Hash}
+use aiken/interval.{Finite}
 use aiken/list.{length}
 use aiken/transaction.{
   InlineDatum, Input, Output, ScriptContext, Spend, Transaction,
@@ -35,6 +36,7 @@ type GameDatum {
   black_pegs: Int,
   white_pegs: Int,
   current_turn: Int,
+  expiration_time: Int,
   vk: ZeroVerificationKey,
   proof: Proof,
 }
@@ -71,48 +73,79 @@ validator {
         token_name1 == token_name2,
         amount1 == amount2 * 2,
       }
+    let signed_by_code_master: Bool =
+      must_be_signed_by(transaction, dat.code_master)
+
+    let signed_by_code_breaker: Bool =
+      must_be_signed_by(transaction, dat.code_breaker)
 
     expect InlineDatum(out_datum) = output_to_contract.datum
     expect new_datum: GameDatum = out_datum
 
+    let correct_signatures: Bool =
+      new_datum.code_master == dat.code_master && new_datum.code_breaker == dat.code_breaker
+
     when rdm is {
-      Start -> and {
+      Start -> {
+        expect Finite(upper_time_point) =
+          transaction.validity_range.upper_bound.bound_type
+        let is_expiration_correct: Bool =
+          upper_time_point + 1200000 <= new_datum.expiration_time
+        expect Finite(lower_time_point) =
+          transaction.validity_range.lower_bound.bound_type
+
+        and {
           dat.current_turn == 0,
           is_double,
           length(dat.guess) == 4,
           new_datum.current_turn == 1,
           must_be_signed_by(transaction, new_datum.code_breaker),
+          new_datum.code_master == dat.code_master,
+          new_datum.hash_solution == dat.hash_solution,
+          is_expiration_correct,
+          upper_time_point - lower_time_point <= 1200000,
         }
-
+      }
       Guess -> and {
           dat.current_turn + 1 == new_datum.current_turn,
           dat.current_turn % 2 == 0,
-          // new_datum.current_turn % 2 == 0 ? 
           dat.current_turn <= 10,
-          // <10 ??
           is_equal,
-          must_be_signed_by(transaction, dat.code_breaker),
+          signed_by_code_breaker,
+          correct_signatures,
+          new_datum.vk == dat.vk,
+          new_datum.expiration_time == dat.expiration_time + 1200000,
         }
 
       Clue -> and {
           dat.current_turn + 1 == new_datum.current_turn,
           dat.current_turn % 2 == 1,
-          // new_datum.current_turn % 2 == 0 ? 
           dat.current_turn <= 10,
           is_equal,
-          must_be_signed_by(transaction, dat.code_master),
+          signed_by_code_master,
+          correct_signatures,
+          new_datum.hash_solution == dat.hash_solution,
+          new_datum.vk == dat.vk,
+          new_datum.expiration_time == dat.expiration_time + 1200000,
         }
 
-      End -> or {
-          dat.black_pegs == 4 && must_be_signed_by(
-            transaction,
-            dat.code_breaker,
-          ),
-          dat.black_pegs < 4 && dat.current_turn == 10 && must_be_signed_by(
-            transaction,
-            dat.code_master,
-          ),
+      End -> {
+        expect Finite(lower_time_point) =
+          transaction.validity_range.lower_bound.bound_type
+
+        let after_expiration_interval = interval.after(dat.expiration_time)
+
+        let expiration_reached: Bool =
+          interval.contains(after_expiration_interval, lower_time_point)
+
+        or {
+          dat.black_pegs == 4 && signed_by_code_breaker,
+          dat.black_pegs < 4 && dat.current_turn == 10 && signed_by_code_master,
+          expiration_reached && dat.current_turn % 2 == 1 && signed_by_code_breaker,
+          expiration_reached && dat.current_turn % 2 == 0 && signed_by_code_master,
+          dat.current_turn == 0 && signed_by_code_master,
         }
+      }
     }
   }
 }
