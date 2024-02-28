@@ -12,20 +12,30 @@ type VerificationKey =
 type PubKeyHash =
   Hash<Blake2b_224, VerificationKey>
 
-type ZeroVerificationKey {
-  n_public: Int,
-  vk_alpha1: List<Int>,
-  vk_beta2: List<List<Int>>,
-  vk_gamma2: List<List<Int>>,
-  vk_delta2: List<List<Int>>,
-  vk_alphabeta12: List<List<List<Int>>>,
-  ic: List<List<Int>>,
+pub type SnarkVerificationKey {
+  nPublic: Int,
+  // G1Element
+  vkAlpha: ByteArray,
+  // G2Element
+  vkBeta: ByteArray,
+  // G2Element
+  vkGamma: ByteArray,
+  // G2Element
+  vkDelta: ByteArray,
+  // List<G2Element>
+  vkAlphaBeta: List<ByteArray>,
+  // List<G1Element>
+  vkIC: List<ByteArray>,
 }
 
-type Proof {
-  pi_a: List<Int>,
-  pi_b: List<List<Int>>,
-  pi_c: List<Int>,
+//
+pub type Proof {
+  // G1Element 
+  piA: ByteArray,
+  // G2Element
+  piB: ByteArray,
+  // G1Element
+  piC: ByteArray,
 }
 
 type GameDatum {
@@ -37,7 +47,7 @@ type GameDatum {
   white_pegs: Int,
   current_turn: Int,
   expiration_time: Int,
-  vk: ZeroVerificationKey,
+  vk: SnarkVerificationKey,
   proof: Proof,
 }
 
