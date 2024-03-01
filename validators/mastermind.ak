@@ -2,14 +2,14 @@ use aiken/hash.{Blake2b_224, Hash}
 use aiken/interval.{Finite}
 use aiken/list.{length}
 use aiken/transaction.{
-  InlineDatum, Input, Output, ScriptContext, Spend, Transaction,
+  InlineDatum, Input, Output, ScriptContext, Spend, Transaction
 }
 use aiken/transaction/value.{flatten}
 
-type VerificationKey =
+pub type VerificationKey =
   ByteArray
 
-type PubKeyHash =
+pub type PubKeyHash =
   Hash<Blake2b_224, VerificationKey>
 
 pub type SnarkVerificationKey {
@@ -38,7 +38,7 @@ pub type Proof {
   piC: ByteArray,
 }
 
-type GameDatum {
+pub type GameDatum {
   code_master: PubKeyHash,
   code_breaker: PubKeyHash,
   hash_solution: Int,
@@ -51,40 +51,23 @@ type GameDatum {
   proof: Proof,
 }
 
-type GameRedeemer {
+pub type GameRedeemer {
   Start
   Guess
   Clue
   End
 }
 
+pub type ValueOptions {
+  Equal 
+  Double
+  Inequal
+}
+
 validator {
-  fn mastermind(dat: GameDatum, rdm: GameRedeemer, ctx: ScriptContext) -> Bool {
-    let ScriptContext { transaction, .. } = ctx
+  pub fn mastermind(dat: GameDatum, rdm: GameRedeemer, ctx: ScriptContext) -> Bool {
+    let ScriptContext { transaction, .. } = ctx  
 
-    // Find input from this spending contract
-    let input_from_contract: Input = find_own_input(ctx)
-    expect [(policyid1, token_name1, amount1)] =
-      flatten(input_from_contract.output.value)
-
-    // Find outputs sent back to the contract
-    expect [output_to_contract] = find_own_outputs(ctx)
-    expect [(policyid2, token_name2, amount2)] =
-      flatten(output_to_contract.value)
-
-    // Check if the amount sent to the contract is equal the amount previously locked.
-    let is_equal: Bool = and {
-        policyid1 == policyid2,
-        token_name1 == token_name2,
-        amount1 == amount2,
-      }
-
-    // Check if the amount sent to the contract is twice the amount initially locked.
-    let is_double: Bool = and {
-        policyid1 == policyid2,
-        token_name1 == token_name2,
-        amount1 == amount2 * 2,
-      }
     // Check if transaction is signed by the CodeMaster
     let signed_by_code_master: Bool =
       must_be_signed_by(transaction, dat.code_master)
@@ -93,16 +76,17 @@ validator {
     let signed_by_code_breaker: Bool =
       must_be_signed_by(transaction, dat.code_breaker)
 
-    // Get new datum
-    expect InlineDatum(out_datum) = output_to_contract.datum
-    expect new_datum: GameDatum = out_datum
-
-    // In Guess and Clue turns the integrity of signatures must remain.
-    let correct_signatures: Bool =
-      new_datum.code_master == dat.code_master && new_datum.code_breaker == dat.code_breaker
-
     when rdm is {
       Start -> {
+        let value_preservation: ValueOptions = value_check(ctx)
+
+        // Find outputs sent back to the contract
+        expect [output_to_contract] = find_own_outputs(ctx)
+
+        // Get new datum
+        expect InlineDatum(out_datum) = output_to_contract.datum
+        expect new_datum: GameDatum = out_datum
+
         // Get upper bound point of the transaction validity range
         expect Finite(upper_time_point) =
           transaction.validity_range.upper_bound.bound_type
@@ -114,37 +98,63 @@ validator {
           transaction.validity_range.lower_bound.bound_type
 
         and {
+          trace "[Fail - Start] Check current turn"
           // Current turn set by CM must be 0
           dat.current_turn == 0,
+          trace "[Fail - Start] Check double value"
           // CB must lock the double of CM value lock
-          is_double,
+          value_preservation == Double,
+          trace "[Fail - Start] Guess length"
           // The guess is sequence of 4 balls 
           // TODO: Must check non valid balls ids
-          length(dat.guess) == 4,
+          length(new_datum.guess) == 4,
+          trace "[Fail - Start] Check new turn "
           // This turn must set to 1
           new_datum.current_turn == 1,
+          trace "[Fail - Start] Check sign"
           // The codebreaker signature must be the same who do the tx.
           must_be_signed_by(transaction, new_datum.code_breaker),
+          trace "[Fail - Start] Check signatures integrety"
           // CodeMaster signature integrity check
           new_datum.code_master == dat.code_master,
+          trace "[Fail - Start] Check hashsol integrity"
           // Hash Solution integrity check
           new_datum.hash_solution == dat.hash_solution,
+          trace "[Fail - Start] Check expiration"
           // Expiration time must be greater or equal than the upper Validity range point + 20 mins 
           is_expiration_correct,
+          trace "[Fail - Start] Check validity range length"
           // The valid range must lesser than 20 min, so that the expiration time is in a nearer time.
           // This prevents to send a tx with that locks the game by setting a expiration time too far away in the future
           upper_time_point - lower_time_point <= 1200000,
         }
       }
-      Guess -> and {
+      Guess -> {
+        let value_preservation: ValueOptions = value_check(ctx)
+
+        // Find outputs sent back to the contract
+        expect [output_to_contract] = find_own_outputs(ctx)
+
+        // Get new datum
+        expect InlineDatum(out_datum) = output_to_contract.datum
+        expect new_datum: GameDatum = out_datum
+
+        // In Guess and Clue turns the integrity of signatures must remain.
+        let correct_signatures: Bool =
+          new_datum.code_master == dat.code_master && new_datum.code_breaker == dat.code_breaker
+
+        and {
           // Next turn must be the sucessor of the current turn
           dat.current_turn + 1 == new_datum.current_turn,
           // The turn must lower than 10 to play
           dat.current_turn < 10,
           // Code Breaker always plays in odd turns
           new_datum.current_turn % 2 == 1,
+          // The guess is sequence of 4 balls 
+          // TODO: Must check non valid balls ids
+          length(new_datum.guess) == 4,
           // Value persistence check.
-          is_equal,
+          value_preservation == Equal,
           // Must signed by Code Breaker
           signed_by_code_breaker,
           // Signature integrity check
@@ -156,28 +166,50 @@ validator {
           // Each turn the expiration time is pushed 20 min in the future.
           new_datum.expiration_time == dat.expiration_time + 1200000,
         }
+      }
+      Clue -> {
+        let value_preservation: ValueOptions = value_check(ctx)
 
-      Clue -> and {
+        // Find outputs sent back to the contract
+        expect [output_to_contract] = find_own_outputs(ctx)
+
+        // Get new datum
+        expect InlineDatum(out_datum) = output_to_contract.datum
+        expect new_datum: GameDatum = out_datum
+
+        // In Guess and Clue turns the integrity of signatures must remain.
+        let correct_signatures: Bool =
+          new_datum.code_master == dat.code_master && new_datum.code_breaker == dat.code_breaker
+        and {
+          trace "[Fail - Start] Check turn"
           // Next turn must be the sucessor of the current turn
           dat.current_turn + 1 == new_datum.current_turn,
           // Code Master always plays in even turns
+          trace "[Fail - Start] Check modulo turn"
           new_datum.current_turn % 2 == 0,
           // The turn must lower than 10 to play
+          trace "[Fail - Start] Turn greater than 10n"
           dat.current_turn < 10,
           // Value persistence check.
-          is_equal,
+          trace "[Fail - Start] Value alteration"
+          value_preservation == Equal,
           // Must be signed by the 
+          trace "[Fail - Start] CM sign check"
           signed_by_code_master,
           // Signatures integrity check
+          trace "[Fail - Start] Datum sig integrity check"
           correct_signatures,
           // Hash solution integrity check
+          trace "[Fail - Start] Hashsol integrity check"
           new_datum.hash_solution == dat.hash_solution,
           // Verification key integrity check
+          trace "[Fail - Start] datum vk integrity check"
           new_datum.vk == dat.vk,
           // Each turn the expiration time is pushed 20 min in the future.
+          trace "[Fail - Start] Expiration time check"
           new_datum.expiration_time == dat.expiration_time + 1200000,
         }
-
+      }
       End -> {
         // Get lower point of the Tx Validity Range
         expect Finite(lower_time_point) =
@@ -194,7 +226,7 @@ validator {
 
         or {
           // Code Breaker wins
-          dat.black_pegs == 4 && signed_by_code_breaker,
+          dat.black_pegs == 4 && signed_by_code_breaker && dat.current_turn <= 10,
           // Code Master wins
           dat.black_pegs < 4 && dat.current_turn == 10 && signed_by_code_master,
           // Code Breaker wins by default
@@ -223,15 +255,46 @@ fn find_own_input(ctx: ScriptContext) -> Input {
 
 // Get outputs to the script.
 fn find_own_outputs(ctx: ScriptContext) -> List<Output> {
-  expect Spend(output_ref) = ctx.purpose
+  let own_input: Input  = find_own_input(ctx)
+  let onw_script_address = own_input.output.address
 
-  let own_outputs =
+  let outputs =
     ctx.transaction.outputs
-      |> transaction.find_script_outputs(output_ref.transaction_id.hash)
-  own_outputs
+
+  expect [own_output] =
+      list.filter(outputs, fn(output: Output) { output.address == onw_script_address })
+  [own_output]
 }
 
 // Check if transaction is signed by...
 fn must_be_signed_by(transaction: Transaction, vk: PubKeyHash) {
   list.has(transaction.extra_signatories, vk)
+}
+
+// 
+
+fn value_check(ctx: ScriptContext) -> ValueOptions {
+    // Find input from this spending contract
+    let input_from_contract: Input = find_own_input(ctx)
+    expect [(policyid1, token_name1, amount1)] =
+      flatten(input_from_contract.output.value)
+
+    // Find outputs sent back to the contract
+    expect [output_to_contract] = find_own_outputs(ctx)
+    expect [(policyid2, token_name2, amount2)] =
+      flatten(output_to_contract.value)
+
+    // Check if the amount sent to the contract is equal the amount previously locked.
+    let token_integrity_check: Bool = and {
+        policyid1 == policyid2,
+        token_name1 == token_name2,
+      }
+
+    if (token_integrity_check && amount1 == amount2) {
+      Equal 
+    } else if (token_integrity_check && amount1 * 2 == amount2) {
+      Double
+    } else {
+      Inequal
+    }
 }
