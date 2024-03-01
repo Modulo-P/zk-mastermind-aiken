@@ -98,32 +98,32 @@ validator {
           transaction.validity_range.lower_bound.bound_type
 
         and {
-          trace "[Fail - Start] Check current turn"
+          trace "[Fail] Check current turn"
           // Current turn set by CM must be 0
           dat.current_turn == 0,
-          trace "[Fail - Start] Check double value"
+          trace "[Fail] Check double value"
           // CB must lock the double of CM value lock
           value_preservation == Double,
-          trace "[Fail - Start] Guess length"
+          trace "[Fail] Guess length"
           // The guess is sequence of 4 balls 
           // TODO: Must check non valid balls ids
           length(new_datum.guess) == 4,
-          trace "[Fail - Start] Check new turn "
+          trace "[Fail] Check new turn "
           // This turn must set to 1
           new_datum.current_turn == 1,
-          trace "[Fail - Start] Check sign"
+          trace "[Fail] Check sign"
           // The codebreaker signature must be the same who do the tx.
           must_be_signed_by(transaction, new_datum.code_breaker),
-          trace "[Fail - Start] Check signatures integrety"
+          trace "[Fail] Check signatures integrety"
           // CodeMaster signature integrity check
           new_datum.code_master == dat.code_master,
-          trace "[Fail - Start] Check hashsol integrity"
+          trace "[Fail] Check hashsol integrity"
           // Hash Solution integrity check
           new_datum.hash_solution == dat.hash_solution,
-          trace "[Fail - Start] Check expiration"
+          trace "[Fail] Check expiration"
           // Expiration time must be greater or equal than the upper Validity range point + 20 mins 
           is_expiration_correct,
-          trace "[Fail - Start] Check validity range length"
+          trace "[Fail] Check validity range length"
           // The valid range must lesser than 20 min, so that the expiration time is in a nearer time.
           // This prevents to send a tx with that locks the game by setting a expiration time too far away in the future
           upper_time_point - lower_time_point <= 1200000,
@@ -144,26 +144,36 @@ validator {
           new_datum.code_master == dat.code_master && new_datum.code_breaker == dat.code_breaker
 
         and {
+          trace "[Fail] Check turn"
           // Next turn must be the sucessor of the current turn
           dat.current_turn + 1 == new_datum.current_turn,
           // The turn must lower than 10 to play
+          trace "[Fail] Turn greater than 10"
           dat.current_turn < 10,
           // Code Breaker always plays in odd turns
+          trace "[Fail] Check modulo turn"
           new_datum.current_turn % 2 == 1,
           // The guess is sequence of 4 balls 
           // TODO: Must check non valid balls ids
+          trace "[Fail] Length guess integrity check"
           length(new_datum.guess) == 4,
           // Value persistence check.
+          trace "[Fail] Value preservatation"
           value_preservation == Equal,
           // Must signed by Code Breaker
+          trace "[Fail] Signature check"
           signed_by_code_breaker,
           // Signature integrity check
+          trace "[Fail] Datum signature check"
           correct_signatures,
           // Hash Solution integrity check
+          trace "[Fail] Hashsol datum integrity check"
           new_datum.hash_solution == dat.hash_solution,
           // Verification key integrity check
+          trace "[Fail] vk datum integrity check"
           new_datum.vk == dat.vk,
           // Each turn the expiration time is pushed 20 min in the future.
+          trace "[Fail] Expiration time check"
           new_datum.expiration_time == dat.expiration_time + 1200000,
         }
       }
@@ -181,32 +191,32 @@ validator {
         let correct_signatures: Bool =
           new_datum.code_master == dat.code_master && new_datum.code_breaker == dat.code_breaker
         and {
-          trace "[Fail - Start] Check turn"
+          trace "[Fail] Check turn"
           // Next turn must be the sucessor of the current turn
           dat.current_turn + 1 == new_datum.current_turn,
           // Code Master always plays in even turns
-          trace "[Fail - Start] Check modulo turn"
+          trace "[Fail] Check modulo turn"
           new_datum.current_turn % 2 == 0,
           // The turn must lower than 10 to play
-          trace "[Fail - Start] Turn greater than 10n"
+          trace "[Fail] Turn greater than 10n"
           dat.current_turn < 10,
           // Value persistence check.
-          trace "[Fail - Start] Value alteration"
+          trace "[Fail] Value alteration"
           value_preservation == Equal,
           // Must be signed by the 
-          trace "[Fail - Start] CM sign check"
+          trace "[Fail] CM sign check"
           signed_by_code_master,
           // Signatures integrity check
-          trace "[Fail - Start] Datum sig integrity check"
+          trace "[Fail] Datum sig integrity check"
           correct_signatures,
           // Hash solution integrity check
-          trace "[Fail - Start] Hashsol integrity check"
+          trace "[Fail] Hashsol integrity check"
           new_datum.hash_solution == dat.hash_solution,
           // Verification key integrity check
-          trace "[Fail - Start] datum vk integrity check"
+          trace "[Fail] datum vk integrity check"
           new_datum.vk == dat.vk,
           // Each turn the expiration time is pushed 20 min in the future.
-          trace "[Fail - Start] Expiration time check"
+          trace "[Fail] Expiration time check"
           new_datum.expiration_time == dat.expiration_time + 1200000,
         }
       }

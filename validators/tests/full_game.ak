@@ -95,10 +95,10 @@ test turn1 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_1: List<Hash<Blake2b_224, VerificationKey>> = [#"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_1: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(300000), is_inclusive: True }
     , upper_bound:
         IntervalBound { bound_type: Finite(600000), is_inclusive: True }
     }
@@ -205,12 +205,12 @@ test turn2 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_2: List<Hash<Blake2b_224, VerificationKey>> = [#"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_2: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
@@ -315,12 +315,12 @@ test turn3 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_3: List<Hash<Blake2b_224, VerificationKey>> = [#"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_3: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 1 + 300000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
@@ -426,12 +426,12 @@ test turn4 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_4: List<Hash<Blake2b_224, VerificationKey>> = [#"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_4: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 1 + 300000 + 300000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
@@ -537,12 +537,12 @@ test turn5 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_5: List<Hash<Blake2b_224, VerificationKey>> = [#"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_5: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 1 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
@@ -649,12 +649,12 @@ test turn6 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_6: List<Hash<Blake2b_224, VerificationKey>> = [#"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_6: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 1 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
@@ -760,12 +760,12 @@ test turn7 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_7: List<Hash<Blake2b_224, VerificationKey>> = [#"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_7: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 1 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
@@ -871,12 +871,12 @@ test turn8 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_8: List<Hash<Blake2b_224, VerificationKey>> = [#"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_8: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 1 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
@@ -968,12 +968,12 @@ test turn9 () {
     // * Define sigs to be included in extra_signatories Tx field.
     let signatures_9: List<Hash<Blake2b_224, VerificationKey>> = [#"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f"]
 
-    // * Define validity range
+    // * Define validity range + 300000 (5min) to lower and upper bound
     let val_range_9: ValidityRange = Interval
     { lower_bound:
-        IntervalBound { bound_type: Finite(1), is_inclusive: True }
+        IntervalBound { bound_type: Finite(1 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     , upper_bound:
-        IntervalBound { bound_type: Finite(600000), is_inclusive: True }
+        IntervalBound { bound_type: Finite(600000 + 1 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000 + 300000), is_inclusive: True }
     }
 
     // * Transaction values wrap-up
