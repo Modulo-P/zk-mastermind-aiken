@@ -7,9 +7,10 @@ use aiken/transaction.{
 use aiken/transaction/credential.{Address, ScriptCredential}
 use aiken/transaction/value.{Value, from_asset, from_lovelace, merge}
 use mastermind.{
-  Clue, End, GameDatum, GameRedeemer, Guess, Proof, SnarkVerificationKey, Start,
+  Clue, End, GameDatum, GameRedeemer, Guess,  Start,
   VerificationKey, mastermind,
 }
+use ak_381/groth16.{Proof, SnarkVerificationKey}
 
 fn gameValue() -> Value {
   merge(
@@ -29,40 +30,46 @@ test turn1() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
+  let proof_1 =
     Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+      piA: #"",
+      piB: #"",
+      piC: #"",
     }
 
   let game_datum_0 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [],
       black_pegs: 0,
       white_pegs: 0,
       current_turn: 0,
       expiration_time: 0,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_1,
     }
 
   // === Purpose Definition ===
@@ -100,14 +107,14 @@ test turn1() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
-      guess: [4, 1, 1, 1],
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
+      guess: [4, 3, 2, 1],
       black_pegs: 0,
       white_pegs: 0,
       current_turn: 1,
       expiration_time: 1200000 + 600000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_1,
     }
 
   // * Create a new output
@@ -167,40 +174,48 @@ test turn2() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
+  let proof_1 =
     Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+      piA: #"",
+      piB: #"",
+      piC: #"",
     }
+
+  
 
   let game_datum_1 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
-      guess: [4, 1, 1, 1],
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
+      guess: [4, 3, 2, 1],
       black_pegs: 0,
       white_pegs: 0,
       current_turn: 1,
       expiration_time: 1200000 + 600000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_1,
     }
 
   // === Purpose Definition ===
@@ -233,19 +248,27 @@ test turn2() {
   // Note: This is an input that comes from the script, so it is the same that the one that is contained in Spend purpose.
   let input_1: Input = Input { output_reference: script_outref, output: utxo_1 }
 
+  // Generate proof 2
+  let proof_2 =
+    Proof {
+      piA: #"972132cdfb134c36e0160ca01747460cffd948d70b0a8437d7f339ac505dada7823309187d60059af3c088f76f6d69aa",
+      piB: #"840cc65995a95c5a9d639324f56202ffe280be5d8a34301f8e78d6d5844fb549918f310a4f81b5863d4ac9e37be0f4a4131f10fbd82429378e00bcc3574d11ffd86db203271a050ec1e53c62e8cf3a025d4e84962ae56c21d9c2949943c8b602",
+      piC: #"8a957cd1045dda7f31f3747253317aa63a3f590a8423ec8665495e41b23326bd76ae6bbc3e7137b1a9452d4ccb6050b9",
+    }
+
   // * Create new Game Datum
   let game_datum_2 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
-      guess: [4, 1, 1, 1],
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
+      guess: [4, 3, 2, 1],
       black_pegs: 0,
-      white_pegs: 2,
+      white_pegs: 4,
       current_turn: 2,
       expiration_time: 600000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_2,
     }
 
   // * Create a new output
@@ -305,40 +328,46 @@ test turn3() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
+  let proof_2 =
     Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+      piA: #"972132cdfb134c36e0160ca01747460cffd948d70b0a8437d7f339ac505dada7823309187d60059af3c088f76f6d69aa",
+      piB: #"840cc65995a95c5a9d639324f56202ffe280be5d8a34301f8e78d6d5844fb549918f310a4f81b5863d4ac9e37be0f4a4131f10fbd82429378e00bcc3574d11ffd86db203271a050ec1e53c62e8cf3a025d4e84962ae56c21d9c2949943c8b602",
+      piC: #"8a957cd1045dda7f31f3747253317aa63a3f590a8423ec8665495e41b23326bd76ae6bbc3e7137b1a9452d4ccb6050b9",
     }
 
   let game_datum_2 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [4, 1, 1, 1],
       black_pegs: 0,
       white_pegs: 2,
       current_turn: 2,
       expiration_time: 600000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_2,
     }
 
   // === Purpose Definition ===
@@ -371,19 +400,27 @@ test turn3() {
   // Note: This is an input that comes from the script, so it is the same that the one that is contained in Spend purpose.
   let input_2: Input = Input { output_reference: script_outref, output: utxo_2 }
 
+  // Create empty proof (Guess)
+  let proof_3 =
+    Proof {
+      piA: #"",
+      piB: #"",
+      piC: #"",
+    }
+
   // * Create new Game Datum
   let game_datum_3 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 1, 4],
       black_pegs: 0,
       white_pegs: 2,
       current_turn: 3,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_3,
     }
 
   // * Create a new output
@@ -443,26 +480,32 @@ test turn4() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
+  let proof_3 =
     Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+      piA: #"",
+      piB: #"",
+      piC: #"",
     }
 
   // * Create new Game Datum
@@ -470,14 +513,14 @@ test turn4() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 1, 4],
       black_pegs: 0,
       white_pegs: 2,
       current_turn: 3,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_3,
     }
 
   // === Purpose Definition ===
@@ -510,19 +553,26 @@ test turn4() {
   // Note: This is an input that comes from the script, so it is the same that the one that is contained in Spend purpose.
   let input_3: Input = Input { output_reference: script_outref, output: utxo_3 }
 
+  // * Create new proof 
+  let proof_4: Proof = Proof {
+      piA: #"81a68d6aed63ad830e02fff4cbfd6201083f4d46e5d8758077322f3de4ae7a3b01280251da823952bc16e98abb5377c8",
+      piB: #"a24d1cd8bede8af638f30316695cc9880db776c7e7d54b4cf27f1483ad10c36e1ec99f113975cc80a49223d8ddd6efc709d8656db16dc1d3db65017329aa82bba4102e256380f60fa72c880a4f862049f3d2ae199ae09a496275a7b2c7c38f79",
+      piC: #"a82269de78d22f8e128c9d87c132f79eb228c2caa2927557c4e090d0473d02e4bbf149a21b87a3fde01f02a768fcf76b",
+    }
+
   // * Create new Game Datum
   let game_datum_4 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 1, 4],
       black_pegs: 2,
       white_pegs: 0,
       current_turn: 4,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_4,
     }
 
   // * Create a new output
@@ -582,26 +632,32 @@ test turn5() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
-    Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+  // * Create new proof 
+  let proof_4: Proof = Proof {
+      piA: #"81a68d6aed63ad830e02fff4cbfd6201083f4d46e5d8758077322f3de4ae7a3b01280251da823952bc16e98abb5377c8",
+      piB: #"a24d1cd8bede8af638f30316695cc9880db776c7e7d54b4cf27f1483ad10c36e1ec99f113975cc80a49223d8ddd6efc709d8656db16dc1d3db65017329aa82bba4102e256380f60fa72c880a4f862049f3d2ae199ae09a496275a7b2c7c38f79",
+      piC: #"a82269de78d22f8e128c9d87c132f79eb228c2caa2927557c4e090d0473d02e4bbf149a21b87a3fde01f02a768fcf76b",
     }
 
   // * Create new Game Datum
@@ -609,14 +665,14 @@ test turn5() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 1, 4],
       black_pegs: 2,
       white_pegs: 0,
       current_turn: 4,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_4,
     }
 
   // === Purpose Definition ===
@@ -649,19 +705,28 @@ test turn5() {
   // Note: This is an input that comes from the script, so it is the same that the one that is contained in Spend purpose.
   let input_4: Input = Input { output_reference: script_outref, output: utxo_4 }
 
+  // * Create empty proof Guess
+
+  // * Create new proof 
+  let proof_5: Proof = Proof {
+      piA: #"",
+      piB: #"",
+      piC: #"",
+    }
+
   // * Create new Game Datum
   let game_datum_5 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 3, 4],
       black_pegs: 2,
       white_pegs: 0,
       current_turn: 5,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_5,
     }
 
   // * Create a new output
@@ -721,26 +786,32 @@ test turn6() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
+  let proof_5 =
     Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+      piA: #"",
+      piB: #"",
+      piC: #"",
     }
 
   // * Create new Game Datum
@@ -748,14 +819,14 @@ test turn6() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 3, 4],
       black_pegs: 2,
       white_pegs: 0,
       current_turn: 5,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_5,
     }
 
   // === Purpose Definition ===
@@ -788,19 +859,27 @@ test turn6() {
   // Note: This is an input that comes from the script, so it is the same that the one that is contained in Spend purpose.
   let input_5: Input = Input { output_reference: script_outref, output: utxo_5 }
 
+  // * Create proof 
+  let proof_6 =
+    Proof {
+      piA: #"82d169d4f21b733c86aa39ab15e7076d237136e17493ea9102cef0277c467d47a24e6a046e537ca0a5baac62793039bb",
+      piB: #"9976e719144213a044a90090573e98b97f6103d47bd0d5c26264271e853621f32f7ed0c3f76ab90f71fe7e6699e9992f114dfac4a3f50305c7f94cd4e82298e63f82a69e941c26685a52ffb8abe88ee87755e2418561ef5ba06e509e0645a249",
+      piC: #"b1626dfbe3c41792412e5aef1221c1a0d6b5b90088eb3a9a8fbcdbabade123f8ccbea73b78d95fffa671d5a7a5115994",
+    }
+
   // * Create new Game Datum
   let game_datum_6 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 3, 4],
       black_pegs: 3,
       white_pegs: 0,
       current_turn: 6,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_6,
     }
 
   // * Create a new output
@@ -864,26 +943,32 @@ test turn7() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
+  let proof_6 =
     Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+      piA: #"82d169d4f21b733c86aa39ab15e7076d237136e17493ea9102cef0277c467d47a24e6a046e537ca0a5baac62793039bb",
+      piB: #"9976e719144213a044a90090573e98b97f6103d47bd0d5c26264271e853621f32f7ed0c3f76ab90f71fe7e6699e9992f114dfac4a3f50305c7f94cd4e82298e63f82a69e941c26685a52ffb8abe88ee87755e2418561ef5ba06e509e0645a249",
+      piC: #"b1626dfbe3c41792412e5aef1221c1a0d6b5b90088eb3a9a8fbcdbabade123f8ccbea73b78d95fffa671d5a7a5115994",
     }
 
   // * Create new Game Datum
@@ -891,14 +976,14 @@ test turn7() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 1, 3, 4],
       black_pegs: 3,
       white_pegs: 0,
       current_turn: 6,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_6,
     }
 
   // === Purpose Definition ===
@@ -931,19 +1016,27 @@ test turn7() {
   // Note: This is an input that comes from the script, so it is the same that the one that is contained in Spend purpose.
   let input_6: Input = Input { output_reference: script_outref, output: utxo_6 }
 
+  // * Create proof
+  let proof_7 =
+    Proof {
+      piA: #"",
+      piB: #"",
+      piC: #"",
+    }
+
   // * Create new Game Datum
   let game_datum_7 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 2, 3, 4],
       black_pegs: 3,
       white_pegs: 0,
       current_turn: 7,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_7,
     }
 
   // * Create a new output
@@ -1007,26 +1100,32 @@ test turn8() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
-  let proof_0 =
+  let proof_7 =
     Proof {
-      piA: #"8b84d092731c653b1accdda79c51e3f5d289bed7311189d927deadef0470e437e6d1d400634726512a79a015867424e3",
-      piB: #"92cb1c125816e4b522c7f430a5d74a61116b6189de7b2341f040194c02f10d9ef0cf081f4029444a65ea74e69d98b1cf08d3864087d5d2dee2ed6ab102f9b78e65d341f0824341a9fc25d0ea9dacccc5d355b4eddb0057949370a19c47135b0e",
-      piC: #"a4ef633c858a3ff194db50eacdf715f7296fb3d1202c54b543284e9656b69aa90f33ac0e2572d3ab847b88268dcd1f7e",
+      piA: #"",
+      piB: #"",
+      piC: #"",
     }
 
   // * Create new Game Datum
@@ -1034,14 +1133,14 @@ test turn8() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 2, 3, 4],
       black_pegs: 3,
       white_pegs: 0,
       current_turn: 7,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_7,
     }
 
   // === Purpose Definition ===
@@ -1074,19 +1173,27 @@ test turn8() {
   // Note: This is an input that comes from the script, so it is the same that the one that is contained in Spend purpose.
   let input_7: Input = Input { output_reference: script_outref, output: utxo_7 }
 
+  // * Create Proof
+  let proof_8 =
+    Proof {
+      piA: #"ab466596ac2be62a2eedcb0d48812ab7d7a4aedbfefb8ea38c604df78e9308a63ecba88e229477f9476fc4c636786493",
+      piB: #"b82893f1ff0fec3d3c11a8a4017188a7e490116c8ff06c5a5bb25b68e20d2d6778def2570418c6aec9a50df324b9d8660d41a18372e6253ea2be1508a6fad89d1324187cc57595a11c6a1c2158eb03da3f13cd006a5b243198fb7f34c611c158",
+      piC: #"b7c7af9fdb7f0e98a07ee8490100d265782277fc7e8e21c51794cb1908127f1e9b9365061307f4929435e39286e65d51",
+    }
+
   // * Create new Game Datum
   let game_datum_8 =
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 2, 3, 4],
       black_pegs: 4,
       white_pegs: 0,
       current_turn: 8,
       expiration_time: 600000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000 + 1200000,
       vk: snark_vk,
-      proof: proof_0,
+      proof: proof_8,
     }
 
   // * Create a new output
@@ -1150,18 +1257,24 @@ test turn9_wins_cb() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
@@ -1177,7 +1290,7 @@ test turn9_wins_cb() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 2, 3, 4],
       black_pegs: 4,
       white_pegs: 0,
@@ -1278,18 +1391,24 @@ test turn11_wins_cm() {
 
   let snark_vk =
     SnarkVerificationKey {
-      nPublic: 2,
-      vkAlpha: #"8e3d9e248feda194cb6fa0a3b64fd2a380cb5e94836bf8148bf97ebcbb5819d9a78f63102f0293c104bcbb2f810d8eb4",
-      vkBeta: #"8cd68a7186a908212680a0234d8210c20328f8fb3ce1d69c9aec9330a5802d6cfaf6d7cf3176133221c19188590cb4141874ea7bbfcb9872931e115d882c46b90c3dcbcee10062d1c9b9b0a691d7bec7d2735f06495c7f71dea210e55b2782df",
+      nPublic: 8,
+      vkAlpha: #"910df641298bf37a09468eb8eefe36cd9333d2698abee298b25521570d19a04c7482b35ed0392a8275ced89cbfa44f39",
+      vkBeta: #"a13e94f2ba50b23446d56fb039cbd357875acbab92ccff7471e7ca79d2748684e6c4c322dce042d33bbfb23bb22cc57d187ca5634ddad5994f1f9a2c5d9d98d8c1916d767bc9aa23de1549a12640aef88543223ac5828d0520007c140f9e8716",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"938231fcec443fbdeb1079ff126b8f69bd8579ffe82d39923214d4345395beee60200288fa20c97ae50f3212131b6f8802af2f9f515c65af6a9a6c294c738590104376a0af44731d6699db6a286608774243f7d1dddc4605eb340e65e15060a5",
+      vkDelta: #"8d835235db743dab2ec2817dc2545aaf4eab5997ce1df83195733c6f7ca9619593f66d06153b294f9dc9bf4e45232534084068327fdbcc5f6bdc07bf4dd6cdd8962c75112842fd7e92b2f13da4c565c0fcff2818e34b768856dfa8041bed7b9e",
       vkAlphaBeta: [
         #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
       ],
       vkIC: [
-        #"b5813c90d3455acb8608fdf66e8601f24ef048f3fdf9384862d77c72cb5cddfde2b307976b1b0319c42ba985f94be60a",
-        #"a41a0e6370c054be0f9acce08e97f6d5702d9daa9e9a934e8a377f553593baa1c58062adc73d63558653422d54d6f50c",
-        #"8e02a87c519c3145f984d25fdf769f74fbc36626c385d4554fb4bc1d7a12cbf669d40f257023b8b3c9a31e631aa8f981",
+        #"aae31c7beb5a2f92b3f9be7ff278c841dc15769244c5cb81b95858fcdfad34621a86f956e1de57cb104050302cc8ae09",
+        #"b721c142b4c9c1de3570dd30d6ec1fc009deef3319ecd0c681c37301eab8fa9e625d4457b3376de26c83d3a6dc63b290",
+        #"b1e0a4b9324277450efd02db4b7d0451a6d556f6bd61fef2df9a7ce7fd321b27e8a0e5943967b1f82856aa87a40f17ba",
+        #"ad3f4b41f48a13eceda136882dfc5cc543cab7714a0abdedf7cc85fa58b4b2c69c1a8f74bc0d89901f2a4ab717a3e412",
+        #"84e0a2709079a6c2b0ce1d3e19242d7a729e19936e8a9a7297055545048d1d7d14bd62baecb8bdd6b33809368461a5c9",
+        #"b33e6b2bfc9f29ef766f6167bf6b3873e073eb79a55153b1ebba15187593273bf64ef7e155d1118535bab8d16676c27e",
+        #"89ce67829659a866237178e52ecbfaeba754a9db3bcc097aa230cd0af9daae18346dc51685ca4ccf650094698a7115c9",
+        #"8c6420bca64925df0c00b45eba87e142b04a12f86013e78c3a97c73922910b94e0647c8d60721d5749e5f5fe739dcb28",
+        #"9142ab2d492fbd93323976cc16057301f4f078b273898fbf98e2c0c6aded69f54b0beae793855599d106400de6c85947"
       ],
     }
 
@@ -1305,7 +1424,7 @@ test turn11_wins_cm() {
     GameDatum {
       code_master: #"4aea7b7035ac699d5d639ca4a0ca9fb567afb54fb3a40e970afba01f",
       code_breaker: #"16ae41ffa134eca2ef5481017439cee4707d73d447f283abb1c7ec8f",
-      hash_solution: 123456789,
+      hash_solution: 391047073361247658225232481261784502922906942967577347518894619662429381081,
       guess: [1, 2, 4, 4],
       black_pegs: 3,
       white_pegs: 0,
