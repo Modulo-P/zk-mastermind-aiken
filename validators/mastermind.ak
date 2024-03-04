@@ -5,38 +5,12 @@ use aiken/transaction.{
   InlineDatum, Input, Output, ScriptContext, Spend, Transaction,
 }
 use aiken/transaction/value.{is_zero, merge, negate}
-
+use ak_381/groth16.{groth_verify, Proof, SnarkVerificationKey}
 pub type VerificationKey =
   ByteArray
 
 pub type PubKeyHash =
   Hash<Blake2b_224, VerificationKey>
-
-pub type SnarkVerificationKey {
-  nPublic: Int,
-  // G1Element
-  vkAlpha: ByteArray,
-  // G2Element
-  vkBeta: ByteArray,
-  // G2Element
-  vkGamma: ByteArray,
-  // G2Element
-  vkDelta: ByteArray,
-  // List<G2Element>
-  vkAlphaBeta: List<ByteArray>,
-  // List<G1Element>
-  vkIC: List<ByteArray>,
-}
-
-//
-pub type Proof {
-  // G1Element 
-  piA: ByteArray,
-  // G2Element
-  piB: ByteArray,
-  // G1Element
-  piC: ByteArray,
-}
 
 pub type GameDatum {
   code_master: PubKeyHash,
@@ -190,6 +164,11 @@ validator {
         // In Guess and Clue turns the integrity of signatures must remain.
         let correct_signatures: Bool =
           new_datum.code_master == dat.code_master && new_datum.code_breaker == dat.code_breaker
+
+        let public_inputs: List<Int> = list.concat(
+          [dat.hash_solution],dat.guess
+        ) |> list.concat(_,[new_datum.black_pegs,new_datum.white_pegs,dat.hash_solution])
+
         and {
           trace @"[Fail] Check turn"
           // Next turn must be the sucessor of the current turn
@@ -218,6 +197,8 @@ validator {
           // Each turn the expiration time is pushed 20 min in the future.
           trace @"[Fail] Expiration time check"
           new_datum.expiration_time == dat.expiration_time + 1200000,
+          trace @"[Fail] Verify zk-proof"
+          groth_verify(new_datum.vk, new_datum.proof, public_inputs )
         }
       }
       End -> {
