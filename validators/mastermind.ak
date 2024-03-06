@@ -1,8 +1,9 @@
-use aiken/hash.{Blake2b_224, Hash}
+use aiken/dict.{Dict}
+use aiken/hash.{Blake2b_224, Blake2b_256, Hash}
 use aiken/interval.{Finite}
 use aiken/list.{length}
 use aiken/transaction.{
-  InlineDatum, Input, Output, ScriptContext, Spend, Transaction,
+  Input, Output, ScriptContext, Spend, Transaction, DatumHash
 }
 use aiken/transaction/value.{is_zero, merge, negate}
 use ak_381/groth16.{groth_verify, Proof, SnarkVerificationKey}
@@ -42,6 +43,9 @@ validator {
   pub fn mastermind(dat: GameDatum, rdm: GameRedeemer, ctx: ScriptContext) -> Bool {
     let ScriptContext { transaction, .. } = ctx
 
+    // Dictionary with the datums provided to the transaction
+    let tx_datums: Dict<Hash<Blake2b_256, Data>, Data> = transaction.datums
+
     // Check if transaction is signed by the CodeMaster
     let signed_by_code_master: Bool =
       must_be_signed_by(transaction, dat.code_master)
@@ -58,7 +62,8 @@ validator {
         expect [output_to_contract] = find_own_outputs(ctx)
 
         // Get new datum
-        expect InlineDatum(out_datum) = output_to_contract.datum
+        expect DatumHash(out_datum_hash) = output_to_contract.datum
+        expect Some(out_datum) = dict.filter(tx_datums, fn(key, _value) { key == out_datum_hash }) |> dict.get(out_datum_hash)
         expect new_datum: GameDatum = out_datum
 
         // Get upper bound point of the transaction validity range
@@ -110,7 +115,8 @@ validator {
         expect [output_to_contract] = find_own_outputs(ctx)
 
         // Get new datum
-        expect InlineDatum(out_datum) = output_to_contract.datum
+        expect DatumHash(out_datum_hash) = output_to_contract.datum
+        expect Some(out_datum) = dict.filter(tx_datums, fn(key, _value) { key == out_datum_hash }) |> dict.get(out_datum_hash)
         expect new_datum: GameDatum = out_datum
 
         // In Guess and Clue turns the integrity of signatures must remain.
@@ -158,7 +164,8 @@ validator {
         expect [output_to_contract] = find_own_outputs(ctx)
 
         // Get new datum
-        expect InlineDatum(out_datum) = output_to_contract.datum
+        expect DatumHash(out_datum_hash) = output_to_contract.datum
+        expect Some(out_datum) = dict.filter(tx_datums, fn(key, _value) { key == out_datum_hash }) |> dict.get(out_datum_hash)
         expect new_datum: GameDatum = out_datum
 
         // In Guess and Clue turns the integrity of signatures must remain.
